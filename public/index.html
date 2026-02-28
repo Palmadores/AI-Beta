@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI-Beta Company Scorer</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>AI-Beta Company Scorer</h1>
+        <p>
+          Paste company names, resolve ambiguous matches, generate AI-Beta scores,
+          review/edit in a grid, then export to Excel.
+        </p>
+      </header>
+
+      <section class="card">
+        <label for="companyInput">Company names (one per line)</label>
+        <textarea id="companyInput" rows="8" placeholder="Oracle&#10;Apple&#10;Meta"></textarea>
+        <div class="actions">
+          <button id="resolveBtn">1) Resolve Companies</button>
+          <button id="analyzeBtn" disabled>2) Analyze & Score</button>
+          <button id="downloadBtn" disabled>Download Excel</button>
+        </div>
+        <p id="status" class="status">Ready.</p>
+      </section>
+
+      <section class="card" id="progressSection" hidden>
+        <h2 id="progressTitle">Live Progress</h2>
+        <ul id="progressList" class="progress-list"></ul>
+      </section>
+
+      <section class="card" id="ambiguitySection" hidden>
+        <h2>Confirm Ambiguous Matches</h2>
+        <div id="ambiguityList"></div>
+      </section>
+
+      <section class="card" id="resultsSection" hidden>
+        <h2>Review Grid</h2>
+        <p class="muted">You can edit scores/comments before downloading. AI-Beta recalculates automatically.</p>
+        <p class="score-guide">How to read scores: Functional/Digital use <strong>-1 to 0</strong> (-1 = highly susceptible, 0 = not susceptible). Resilience uses <strong>0 to 1</strong> (0 = strong moat, 1 = weak/no moat). AI Infrastructure and AI Competitiveness use <strong>0 to 1</strong> (0 = no upside, 1 = high upside).</p>
+        <div class="table-wrap">
+          <table id="resultsTable">
+            <thead>
+              <tr>
+                <th><div class="col-title">Company</div><div class="col-desc">Entity being scored.</div></th>
+                <th><div class="col-title">Functional Susceptibility</div><div class="col-desc">How automatable core tasks are today.</div></th>
+                <th><div class="col-title">Digital Susceptibility</div><div class="col-desc">How digitally exposed service delivery is.</div></th>
+                <th><div class="col-title">Resilience (Moat Risk)</div><div class="col-desc">Strength of moat against AI disruption.</div></th>
+                <th><div class="col-title">AI Infrastructure Upside</div><div class="col-desc">Revenue exposure to AI infrastructure build-out.</div></th>
+                <th><div class="col-title">AI Competitiveness Upside</div><div class="col-desc">Potential AI-driven margin/revenue gains.</div></th>
+                <th><div class="col-title">AI-Beta Score</div><div class="col-desc">Calculated total from the five dimensions.</div></th>
+                <th><div class="col-title">Comment</div><div class="col-desc">One-sentence rationale for assigned scores.</div></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card" id="dialogueSection">
+        <h2>Score Dialogue</h2>
+        <p class="muted">Ask by typing or voice. Select a company row to discuss rationale and refine scores together.</p>
+        <div class="dialog-controls">
+          <label for="chatCompanySelect">Company</label>
+          <select id="chatCompanySelect"></select>
+        </div>
+        <div id="chatMessages" class="chat-messages"></div>
+        <div class="chat-actions">
+          <input id="chatInput" type="text" placeholder="Ask why this score was chosen, or request a refinement..." />
+          <button id="voiceBtn" type="button">Voice</button>
+          <button id="sendChatBtn" type="button">Send</button>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
