@@ -124,7 +124,7 @@ function extractResponseText(data) {
 
 async function callOpenAI({ apiKey, system, user, useWebSearch = true }) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 90000);
+  const timeout = setTimeout(() => controller.abort(), 180000);
 
   const payload = {
     model,
@@ -151,6 +151,7 @@ async function callOpenAI({ apiKey, system, user, useWebSearch = true }) {
 
     if (!response.ok) {
       const body = await response.text();
+      console.error(`OpenAI API error ${response.status}:`, body);
       throw new Error(`OpenAI API error ${response.status}: ${body}`);
     }
 
@@ -201,7 +202,7 @@ function computeAiBeta(scores) {
   const resilience = clamp(scores.resilience, 0, 1);
   const infra = clamp(scores.ai_infrastructure_upside, 0, 1);
   const competitive = clamp(scores.ai_competitiveness_upside, 0, 1);
-  return Number((((functional + digital) * resilience) + infra + competitive).toFixed(4));
+  return Number(((functional + digital) * (1 - resilience) + infra + competitive).toFixed(4));
 }
 
 async function mapWithConcurrency(items, concurrency, worker, onProgress, onStart) {
@@ -222,6 +223,7 @@ async function mapWithConcurrency(items, concurrency, worker, onProgress, onStar
       try {
         results[index] = await worker(items[index], index);
       } catch (error) {
+        console.error(`Worker error [${index}]:`, error?.message || error);
         results[index] = { __error: String(error?.message || error) };
       }
 
@@ -491,7 +493,7 @@ async function analyzeOneCompany(company) {
       'Scoring bounds and intent:',
       '- functional_susceptibility: -1 to 0 (-1 = tasks can be quickly replaced by AI, 0 = tasks not currently replaceable by AI)',
       '- digital_susceptibility: -1 to 0 (-1 = very digitally susceptible, 0 = impervious)',
-      '- resilience: 0 to 1 (0 = strong moat/high resilience, 1 = no moat/low resilience)',
+      '- resilience: 0 to 1 (0 = weak moat/low resilience, 1 = strong moat/high resilience)',
       '- ai_infrastructure_upside: 0 to 1 (higher = more revenue tied to AI infra)',
       '- ai_competitiveness_upside: 0 to 1 (higher = can gain margin/revenue with AI)',
       'Comment rules:',
@@ -730,7 +732,7 @@ app.post('/api/dialogue', async (req, res) => {
         'Rules:',
         '- Explain rationale clearly and briefly.',
         '- suggested_updates should be null unless user asks to change/refine score/comment.',
-        '- Keep score bounds: functional [-1,0], digital [-1,0], resilience [0,1], infra [0,1], competitiveness [0,1].',
+        '- Keep score bounds: functional [-1,0], digital [-1,0], resilience [0,1] (0=weak moat, 1=strong moat), infra [0,1], competitiveness [0,1].',
         '- If suggesting updates, only set fields you propose to change; others must be null.'
       ].join('\n'),
       user: JSON.stringify({

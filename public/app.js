@@ -44,7 +44,7 @@ function computeAiBeta(row) {
   const resilience = clamp(row.resilience, 0, 1);
   const infra = clamp(row.ai_infrastructure_upside, 0, 1);
   const competitive = clamp(row.ai_competitiveness_upside, 0, 1);
-  return Number((((functional + digital) * resilience) + infra + competitive).toFixed(4));
+  return Number(((functional + digital) * (1 - resilience) + infra + competitive).toFixed(4));
 }
 
 function ragClassForMetric(metric, value) {
@@ -53,7 +53,7 @@ function ragClassForMetric(metric, value) {
   if (metric === 'functional_susceptibility' || metric === 'digital_susceptibility') {
     goodness = clamp(value + 1, 0, 1);
   } else if (metric === 'resilience') {
-    goodness = clamp(1 - value, 0, 1);
+    goodness = clamp(value, 0, 1);
   } else if (metric === 'ai_infrastructure_upside' || metric === 'ai_competitiveness_upside') {
     goodness = clamp(value, 0, 1);
   } else if (metric === 'ai_beta') {
@@ -528,6 +528,10 @@ resolveBtn.addEventListener('click', async () => {
 
     analyzeBtn.disabled = false;
     resolveBtn.disabled = false;
+
+    if (!ambiguousCompanies.length && resolvedCompanies.length) {
+      analyzeBtn.click();
+    }
   } catch (error) {
     setStatus(`Resolve error: ${error.message}`);
     resolveBtn.disabled = false;
