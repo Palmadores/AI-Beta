@@ -13,6 +13,7 @@ const ambiguityList = document.getElementById('ambiguityList');
 const resultsSection = document.getElementById('resultsSection');
 const resultsTableBody = document.querySelector('#resultsTable tbody');
 
+const confirmAmbiguityBtn = document.getElementById('confirmAmbiguityBtn');
 const dialogueSection = document.getElementById('dialogueSection');
 const chatCompanySelect = document.getElementById('chatCompanySelect');
 const chatMessages = document.getElementById('chatMessages');
@@ -661,6 +662,10 @@ async function sendChat() {
     setStatus(`Dialogue error: ${error.message}`);
   }
 }
+
+confirmAmbiguityBtn.addEventListener('click', () => {
+  analyzeBtn.click();
+});
 
 sendChatBtn.addEventListener('click', sendChat);
 chatInput.addEventListener('keydown', (event) => {

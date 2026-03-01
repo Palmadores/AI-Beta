@@ -320,6 +320,48 @@ const resolveFastPath = {
     exchange: 'NASDAQ',
     country: 'United States',
     description: 'Electric vehicle and energy technology company.'
+  },
+  xai: {
+    name: 'xAI Corp',
+    ticker: '',
+    exchange: 'Private',
+    country: 'United States',
+    description: 'Elon Musk\'s AI company, developer of the Grok large language model.'
+  },
+  softbank: {
+    name: 'SoftBank Group Corp',
+    ticker: '9984',
+    exchange: 'TSE',
+    country: 'Japan',
+    description: 'Japanese tech conglomerate and major AI investor via Vision Fund.'
+  },
+  coreweave: {
+    name: 'CoreWeave, Inc.',
+    ticker: '',
+    exchange: 'Private',
+    country: 'United States',
+    description: 'AI cloud infrastructure provider specialising in GPU compute.'
+  },
+  anthropic: {
+    name: 'Anthropic PBC',
+    ticker: '',
+    exchange: 'Private',
+    country: 'United States',
+    description: 'AI safety company and developer of the Claude large language model.'
+  },
+  openai: {
+    name: 'OpenAI, Inc.',
+    ticker: '',
+    exchange: 'Private',
+    country: 'United States',
+    description: 'AI research company, developer of GPT models and ChatGPT.'
+  },
+  wpp: {
+    name: 'WPP plc',
+    ticker: 'WPP',
+    exchange: 'LSE',
+    country: 'United Kingdom',
+    description: 'Global advertising and communications services group.'
   }
 };
 
