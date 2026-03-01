@@ -197,12 +197,11 @@ function clamp(value, min, max) {
 }
 
 function computeAiBeta(scores) {
-  const functional = clamp(scores.functional_susceptibility, -1, 0);
-  const digital = clamp(scores.digital_susceptibility, -1, 0);
-  const resilience = clamp(scores.resilience, 0, 1);
-  const infra = clamp(scores.ai_infrastructure_upside, 0, 1);
-  const competitive = clamp(scores.ai_competitiveness_upside, 0, 1);
-  return Number(((functional + digital) * (1 - resilience) + infra + competitive).toFixed(4));
+  const disruption = clamp(scores.disruption_risk, -1, 0);
+  const moat = clamp(scores.moat, 0, 1);
+  const upside = clamp(scores.ai_upside, 0, 1);
+  const leverage = clamp(scores.ai_leverage, 1, 10);
+  return Number(((disruption * (1 - moat)) + (upside * leverage)).toFixed(4));
 }
 
 async function mapWithConcurrency(items, concurrency, worker, onProgress, onStart) {
@@ -476,40 +475,43 @@ async function analyzeOneCompany(company) {
 
   const output = await openAIJson({
     system: [
-      'You are a financial/technology analyst scoring AI-Beta dimensions through Feb 2028.',
+      'You are a financial/technology analyst scoring AI-Beta for a reinsurance investment team.',
       'Research with web search before scoring.',
       'Return only strict JSON with this shape:',
       '{',
       '  "company": string,',
       '  "scores": {',
-      '    "functional_susceptibility": number,',
-      '    "digital_susceptibility": number,',
-      '    "resilience": number,',
-      '    "ai_infrastructure_upside": number,',
-      '    "ai_competitiveness_upside": number',
+      '    "disruption_risk": number,',
+      '    "moat": number,',
+      '    "ai_upside": number,',
+      '    "ai_leverage": number',
       '  },',
       '  "comment": string',
       '}',
       'Scoring bounds and intent:',
-      '- functional_susceptibility: -1 to 0 (-1 = tasks can be quickly replaced by AI, 0 = tasks not currently replaceable by AI)',
-      '- digital_susceptibility: -1 to 0 (-1 = very digitally susceptible, 0 = impervious)',
-      '- resilience: 0 to 1 (0 = weak moat/low resilience, 1 = strong moat/high resilience)',
-      '- ai_infrastructure_upside: 0 to 1 (higher = more revenue tied to AI infra)',
-      '- ai_competitiveness_upside: 0 to 1 (higher = can gain margin/revenue with AI)',
+      '- disruption_risk: -1 to 0 (-1 = AI completely destroys existing business model/revenue e.g. WPP, Chegg; 0 = completely impervious to AI disruption)',
+      '- moat: 0 to 1 (0 = no competitive moat, fully exposed to disruption; 1 = very strong moat, disruption neutralised)',
+      '- ai_upside: 0 to 1 (0 = no AI revenue or competitive tailwind; 1 = core AI infrastructure beneficiary e.g. NVIDIA, cloud providers)',
+      '- ai_leverage: 1 to 10 (amplification multiplier for how much the company has bet on AI succeeding:',
+      '  1 = no AI leverage, modest tailwind;',
+      '  2-3 = meaningful AI strategic focus, some capex commitment;',
+      '  4-6 = heavy debt-funded AI capex, significant concentration e.g. Oracle, AWS;',
+      '  7-10 = pure leveraged AI play, binary outcome e.g. xAI, Softbank Vision Fund, CoreWeave)',
+      'Formula: AI-Beta = (disruption_risk x (1 - moat)) + (ai_upside x ai_leverage)',
+      'Output range: -1 (strongly negatively correlated with AI) to +10 (extreme leveraged AI bet)',
       'Comment rules:',
       '- one sentence only',
-      '- explain your score reasoning clearly with concrete factors'
+      '- explain the key score drivers concisely'
     ].join('\n'),
-    user: `Analyze company and score all 5 dimensions for: ${descriptor}`
+    user: `Analyze and score all 4 AI-Beta dimensions for: ${descriptor}`
   });
 
   const scores = output.scores || {};
   const normalizedScores = {
-    functional_susceptibility: clamp(scores.functional_susceptibility, -1, 0),
-    digital_susceptibility: clamp(scores.digital_susceptibility, -1, 0),
-    resilience: clamp(scores.resilience, 0, 1),
-    ai_infrastructure_upside: clamp(scores.ai_infrastructure_upside, 0, 1),
-    ai_competitiveness_upside: clamp(scores.ai_competitiveness_upside, 0, 1)
+    disruption_risk: clamp(scores.disruption_risk, -1, 0),
+    moat: clamp(scores.moat, 0, 1),
+    ai_upside: clamp(scores.ai_upside, 0, 1),
+    ai_leverage: clamp(scores.ai_leverage, 1, 10)
   };
 
   return {
@@ -721,18 +723,17 @@ app.post('/api/dialogue', async (req, res) => {
         '{',
         '  "answer": string,',
         '  "suggested_updates": {',
-        '    "functional_susceptibility": number | null,',
-        '    "digital_susceptibility": number | null,',
-        '    "resilience": number | null,',
-        '    "ai_infrastructure_upside": number | null,',
-        '    "ai_competitiveness_upside": number | null,',
+        '    "disruption_risk": number | null,',
+        '    "moat": number | null,',
+        '    "ai_upside": number | null,',
+        '    "ai_leverage": number | null,',
         '    "comment": string | null',
         '  } | null',
         '}',
         'Rules:',
         '- Explain rationale clearly and briefly.',
         '- suggested_updates should be null unless user asks to change/refine score/comment.',
-        '- Keep score bounds: functional [-1,0], digital [-1,0], resilience [0,1] (0=weak moat, 1=strong moat), infra [0,1], competitiveness [0,1].',
+        '- Keep score bounds: disruption_risk [-1,0], moat [0,1] (0=no moat, 1=strong moat), ai_upside [0,1], ai_leverage [1,10] (1=no leverage, 10=extreme leveraged AI bet).',
         '- If suggesting updates, only set fields you propose to change; others must be null.'
       ].join('\n'),
       user: JSON.stringify({
@@ -745,21 +746,18 @@ app.post('/api/dialogue', async (req, res) => {
     let suggested = null;
     if (output?.suggested_updates && typeof output.suggested_updates === 'object') {
       suggested = {
-        functional_susceptibility: output.suggested_updates.functional_susceptibility == null
+        disruption_risk: output.suggested_updates.disruption_risk == null
           ? null
-          : clamp(output.suggested_updates.functional_susceptibility, -1, 0),
-        digital_susceptibility: output.suggested_updates.digital_susceptibility == null
+          : clamp(output.suggested_updates.disruption_risk, -1, 0),
+        moat: output.suggested_updates.moat == null
           ? null
-          : clamp(output.suggested_updates.digital_susceptibility, -1, 0),
-        resilience: output.suggested_updates.resilience == null
+          : clamp(output.suggested_updates.moat, 0, 1),
+        ai_upside: output.suggested_updates.ai_upside == null
           ? null
-          : clamp(output.suggested_updates.resilience, 0, 1),
-        ai_infrastructure_upside: output.suggested_updates.ai_infrastructure_upside == null
+          : clamp(output.suggested_updates.ai_upside, 0, 1),
+        ai_leverage: output.suggested_updates.ai_leverage == null
           ? null
-          : clamp(output.suggested_updates.ai_infrastructure_upside, 0, 1),
-        ai_competitiveness_upside: output.suggested_updates.ai_competitiveness_upside == null
-          ? null
-          : clamp(output.suggested_updates.ai_competitiveness_upside, 0, 1),
+          : clamp(output.suggested_updates.ai_leverage, 1, 10),
         comment: output.suggested_updates.comment == null
           ? null
           : String(output.suggested_updates.comment).trim()
@@ -784,11 +782,10 @@ app.post('/api/export', (req, res) => {
 
     const worksheetRows = rows.map((r) => ({
       Company: r.company,
-      'Functional Susceptibility': r.functional_susceptibility,
-      'Digital Susceptibility': r.digital_susceptibility,
-      Resilience: r.resilience,
-      'AI Infrastructure Upside': r.ai_infrastructure_upside,
-      'AI Competitiveness Upside': r.ai_competitiveness_upside,
+      'Disruption Risk': r.disruption_risk,
+      'Moat': r.moat,
+      'AI Upside': r.ai_upside,
+      'AI Leverage': r.ai_leverage,
       'AI-Beta Score': r.ai_beta,
       Comment: r.comment
     }));

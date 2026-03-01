@@ -40,17 +40,16 @@
       <section class="card" id="resultsSection" hidden>
         <h2>Review Grid</h2>
         <p class="muted">You can edit scores/comments before downloading. AI-Beta recalculates automatically.</p>
-        <p class="score-guide">How to read scores: Functional/Digital use <strong>-1 to 0</strong> (-1 = highly susceptible, 0 = not susceptible). Resilience uses <strong>0 to 1</strong> (0 = weak moat, 1 = strong moat). AI Infrastructure and AI Competitiveness use <strong>0 to 1</strong> (0 = no upside, 1 = high upside). AI-Beta is calculated as: <strong>(Functional + Digital) × (1 − Resilience) + AI Infrastructure + AI Competitiveness</strong> — companies with high susceptibility but a strong moat (Resilience = 1) have their downside reduced to zero.</p>
+        <p class="score-guide">Disruption Risk: <strong>-1 to 0</strong> (-1 = AI destroys business model, 0 = impervious). Moat: <strong>0 to 1</strong> (0 = no moat, 1 = strong moat — dampens disruption). AI Upside: <strong>0 to 1</strong> (0 = no tailwind, 1 = core AI beneficiary). AI Leverage: <strong>1 to 10</strong> (how much the company has bet on AI — 1 = modest, 10 = extreme leveraged play). Formula: <strong>AI-Beta = (Disruption × (1 − Moat)) + (AI Upside × AI Leverage)</strong>. Range: −1 (AI destroys value) to +10 (extreme AI bet). High leverage names (+5 to +10) carry binary risk — ideal for equity, dangerous for debt.</p>
         <div class="table-wrap">
           <table id="resultsTable">
             <thead>
               <tr>
                 <th><div class="col-title">Company</div><div class="col-desc">Entity being scored.</div></th>
-                <th><div class="col-title">Functional Susceptibility</div><div class="col-desc">How automatable core tasks are today.</div></th>
-                <th><div class="col-title">Digital Susceptibility</div><div class="col-desc">How digitally exposed service delivery is.</div></th>
-                <th><div class="col-title">Resilience (Moat Risk)</div><div class="col-desc">Strength of moat against AI disruption.</div></th>
-                <th><div class="col-title">AI Infrastructure Upside</div><div class="col-desc">Revenue exposure to AI infrastructure build-out.</div></th>
-                <th><div class="col-title">AI Competitiveness Upside</div><div class="col-desc">Potential AI-driven margin/revenue gains.</div></th>
+                <th><div class="col-title">Disruption Risk</div><div class="col-desc">How severely AI threatens existing revenue (-1 to 0).</div></th>
+                <th><div class="col-title">Moat</div><div class="col-desc">Competitive moat dampening disruption (0 to 1).</div></th>
+                <th><div class="col-title">AI Upside</div><div class="col-desc">AI revenue &amp; competitive tailwind (0 to 1).</div></th>
+                <th><div class="col-title">AI Leverage</div><div class="col-desc">Amplification of AI bet — financial &amp; strategic (1 to 10).</div></th>
                 <th><div class="col-title">AI-Beta Score</div><div class="col-desc">Calculated total from the five dimensions.</div></th>
                 <th><div class="col-title">Comment</div><div class="col-desc">One-sentence rationale for assigned scores.</div></th>
               </tr>

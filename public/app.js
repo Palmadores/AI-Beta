@@ -39,25 +39,27 @@ function clamp(value, min, max) {
 }
 
 function computeAiBeta(row) {
-  const functional = clamp(row.functional_susceptibility, -1, 0);
-  const digital = clamp(row.digital_susceptibility, -1, 0);
-  const resilience = clamp(row.resilience, 0, 1);
-  const infra = clamp(row.ai_infrastructure_upside, 0, 1);
-  const competitive = clamp(row.ai_competitiveness_upside, 0, 1);
-  return Number(((functional + digital) * (1 - resilience) + infra + competitive).toFixed(4));
+  const disruption = clamp(row.disruption_risk, -1, 0);
+  const moat = clamp(row.moat, 0, 1);
+  const upside = clamp(row.ai_upside, 0, 1);
+  const leverage = clamp(row.ai_leverage, 1, 10);
+  return Number(((disruption * (1 - moat)) + (upside * leverage)).toFixed(4));
 }
 
 function ragClassForMetric(metric, value) {
   let goodness = 0.5;
 
-  if (metric === 'functional_susceptibility' || metric === 'digital_susceptibility') {
+  if (metric === 'disruption_risk') {
     goodness = clamp(value + 1, 0, 1);
-  } else if (metric === 'resilience') {
+  } else if (metric === 'moat') {
     goodness = clamp(value, 0, 1);
-  } else if (metric === 'ai_infrastructure_upside' || metric === 'ai_competitiveness_upside') {
+  } else if (metric === 'ai_upside') {
     goodness = clamp(value, 0, 1);
+  } else if (metric === 'ai_leverage') {
+    // neutral — high leverage is good for equity, risky for debt
+    goodness = 0.5;
   } else if (metric === 'ai_beta') {
-    if (value >= 1) return 'rag-good';
+    if (value >= 2) return 'rag-good';
     if (value >= 0) return 'rag-mid';
     return 'rag-bad';
   }
@@ -213,65 +215,53 @@ function renderResults() {
     const companyTd = document.createElement('td');
     companyTd.textContent = row.company;
 
-    const functionalTd = document.createElement('td');
-    const functionalInput = document.createElement('input');
-    functionalInput.className = 'grid-input';
-    functionalInput.type = 'number';
-    functionalInput.step = '0.01';
-    functionalInput.min = '-1';
-    functionalInput.max = '0';
-    functionalInput.value = row.functional_susceptibility;
-    bindNumberInput(functionalInput, index, 'functional_susceptibility', -1, 0);
-    applyRagClass(functionalInput, 'functional_susceptibility', row.functional_susceptibility);
-    functionalTd.appendChild(functionalInput);
+    const disruptionTd = document.createElement('td');
+    const disruptionInput = document.createElement('input');
+    disruptionInput.className = 'grid-input';
+    disruptionInput.type = 'number';
+    disruptionInput.step = '0.01';
+    disruptionInput.min = '-1';
+    disruptionInput.max = '0';
+    disruptionInput.value = row.disruption_risk;
+    bindNumberInput(disruptionInput, index, 'disruption_risk', -1, 0);
+    applyRagClass(disruptionInput, 'disruption_risk', row.disruption_risk);
+    disruptionTd.appendChild(disruptionInput);
 
-    const digitalTd = document.createElement('td');
-    const digitalInput = document.createElement('input');
-    digitalInput.className = 'grid-input';
-    digitalInput.type = 'number';
-    digitalInput.step = '0.01';
-    digitalInput.min = '-1';
-    digitalInput.max = '0';
-    digitalInput.value = row.digital_susceptibility;
-    bindNumberInput(digitalInput, index, 'digital_susceptibility', -1, 0);
-    applyRagClass(digitalInput, 'digital_susceptibility', row.digital_susceptibility);
-    digitalTd.appendChild(digitalInput);
+    const moatTd = document.createElement('td');
+    const moatInput = document.createElement('input');
+    moatInput.className = 'grid-input';
+    moatInput.type = 'number';
+    moatInput.step = '0.01';
+    moatInput.min = '0';
+    moatInput.max = '1';
+    moatInput.value = row.moat;
+    bindNumberInput(moatInput, index, 'moat', 0, 1);
+    applyRagClass(moatInput, 'moat', row.moat);
+    moatTd.appendChild(moatInput);
 
-    const resilienceTd = document.createElement('td');
-    const resilienceInput = document.createElement('input');
-    resilienceInput.className = 'grid-input';
-    resilienceInput.type = 'number';
-    resilienceInput.step = '0.01';
-    resilienceInput.min = '0';
-    resilienceInput.max = '1';
-    resilienceInput.value = row.resilience;
-    bindNumberInput(resilienceInput, index, 'resilience', 0, 1);
-    applyRagClass(resilienceInput, 'resilience', row.resilience);
-    resilienceTd.appendChild(resilienceInput);
+    const upsideTd = document.createElement('td');
+    const upsideInput = document.createElement('input');
+    upsideInput.className = 'grid-input';
+    upsideInput.type = 'number';
+    upsideInput.step = '0.01';
+    upsideInput.min = '0';
+    upsideInput.max = '1';
+    upsideInput.value = row.ai_upside;
+    bindNumberInput(upsideInput, index, 'ai_upside', 0, 1);
+    applyRagClass(upsideInput, 'ai_upside', row.ai_upside);
+    upsideTd.appendChild(upsideInput);
 
-    const infraTd = document.createElement('td');
-    const infraInput = document.createElement('input');
-    infraInput.className = 'grid-input';
-    infraInput.type = 'number';
-    infraInput.step = '0.01';
-    infraInput.min = '0';
-    infraInput.max = '1';
-    infraInput.value = row.ai_infrastructure_upside;
-    bindNumberInput(infraInput, index, 'ai_infrastructure_upside', 0, 1);
-    applyRagClass(infraInput, 'ai_infrastructure_upside', row.ai_infrastructure_upside);
-    infraTd.appendChild(infraInput);
-
-    const competitiveTd = document.createElement('td');
-    const competitiveInput = document.createElement('input');
-    competitiveInput.className = 'grid-input';
-    competitiveInput.type = 'number';
-    competitiveInput.step = '0.01';
-    competitiveInput.min = '0';
-    competitiveInput.max = '1';
-    competitiveInput.value = row.ai_competitiveness_upside;
-    bindNumberInput(competitiveInput, index, 'ai_competitiveness_upside', 0, 1);
-    applyRagClass(competitiveInput, 'ai_competitiveness_upside', row.ai_competitiveness_upside);
-    competitiveTd.appendChild(competitiveInput);
+    const leverageTd = document.createElement('td');
+    const leverageInput = document.createElement('input');
+    leverageInput.className = 'grid-input';
+    leverageInput.type = 'number';
+    leverageInput.step = '0.1';
+    leverageInput.min = '1';
+    leverageInput.max = '10';
+    leverageInput.value = row.ai_leverage;
+    bindNumberInput(leverageInput, index, 'ai_leverage', 1, 10);
+    applyRagClass(leverageInput, 'ai_leverage', row.ai_leverage);
+    leverageTd.appendChild(leverageInput);
 
     const betaTd = document.createElement('td');
     betaTd.className = 'grid-score';
@@ -290,11 +280,10 @@ function renderResults() {
     commentTd.appendChild(commentInput);
 
     tr.appendChild(companyTd);
-    tr.appendChild(functionalTd);
-    tr.appendChild(digitalTd);
-    tr.appendChild(resilienceTd);
-    tr.appendChild(infraTd);
-    tr.appendChild(competitiveTd);
+    tr.appendChild(disruptionTd);
+    tr.appendChild(moatTd);
+    tr.appendChild(upsideTd);
+    tr.appendChild(leverageTd);
     tr.appendChild(betaTd);
     tr.appendChild(commentTd);
     resultsTableBody.appendChild(tr);
@@ -382,11 +371,10 @@ function applySuggestedUpdate(suggestion) {
 
   const row = rows[index];
   const keys = [
-    'functional_susceptibility',
-    'digital_susceptibility',
-    'resilience',
-    'ai_infrastructure_upside',
-    'ai_competitiveness_upside',
+    'disruption_risk',
+    'moat',
+    'ai_upside',
+    'ai_leverage',
     'comment'
   ];
 
@@ -395,11 +383,10 @@ function applySuggestedUpdate(suggestion) {
     row[key] = suggestion[key];
   });
 
-  row.functional_susceptibility = clamp(row.functional_susceptibility, -1, 0);
-  row.digital_susceptibility = clamp(row.digital_susceptibility, -1, 0);
-  row.resilience = clamp(row.resilience, 0, 1);
-  row.ai_infrastructure_upside = clamp(row.ai_infrastructure_upside, 0, 1);
-  row.ai_competitiveness_upside = clamp(row.ai_competitiveness_upside, 0, 1);
+  row.disruption_risk = clamp(row.disruption_risk, -1, 0);
+  row.moat = clamp(row.moat, 0, 1);
+  row.ai_upside = clamp(row.ai_upside, 0, 1);
+  row.ai_leverage = clamp(row.ai_leverage, 1, 10);
   row.ai_beta = computeAiBeta(row);
 
   renderResults();
