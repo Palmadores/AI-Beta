@@ -44,6 +44,62 @@
       <section class="card" id="resultsSection" hidden>
         <h2>Review Grid</h2>
         <p class="muted">You can edit scores/comments before downloading. AI-Beta recalculates automatically.</p>
+        <figure class="number-line-figure">
+          <svg viewBox="0 0 900 95" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+            <defs>
+              <linearGradient id="nl-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"    stop-color="#c0392b"/>
+                <stop offset="9.1%"  stop-color="#e67e22"/>
+                <stop offset="27.3%" stop-color="#27ae60"/>
+                <stop offset="63.6%" stop-color="#2980b9"/>
+                <stop offset="100%"  stop-color="#8e44ad"/>
+              </linearGradient>
+            </defs>
+            <!-- Bar -->
+            <rect x="50" y="54" width="800" height="10" rx="5" fill="url(#nl-grad)"/>
+            <!-- Ticks -->
+            <line x1="50"  y1="64" x2="50"  y2="71" stroke="#999" stroke-width="1"/>
+            <line x1="123" y1="64" x2="123" y2="71" stroke="#999" stroke-width="1"/>
+            <line x1="268" y1="64" x2="268" y2="71" stroke="#999" stroke-width="1"/>
+            <line x1="414" y1="64" x2="414" y2="71" stroke="#999" stroke-width="1"/>
+            <line x1="559" y1="64" x2="559" y2="71" stroke="#999" stroke-width="1"/>
+            <line x1="705" y1="64" x2="705" y2="71" stroke="#999" stroke-width="1"/>
+            <line x1="850" y1="64" x2="850" y2="71" stroke="#999" stroke-width="1"/>
+            <!-- Tick labels -->
+            <text x="50"  y="83" text-anchor="middle" font-size="11" fill="#888">−1</text>
+            <text x="123" y="83" text-anchor="middle" font-size="11" fill="#888">0</text>
+            <text x="268" y="83" text-anchor="middle" font-size="11" fill="#888">+2</text>
+            <text x="414" y="83" text-anchor="middle" font-size="11" fill="#888">+4</text>
+            <text x="559" y="83" text-anchor="middle" font-size="11" fill="#888">+6</text>
+            <text x="705" y="83" text-anchor="middle" font-size="11" fill="#888">+8</text>
+            <text x="850" y="83" text-anchor="middle" font-size="11" fill="#888">+10</text>
+            <!-- WPP (−0.85) row 1 -->
+            <text x="61"  y="14" text-anchor="middle" font-size="10.5" fill="#c0392b" font-weight="600">WPP</text>
+            <line x1="61"  y1="17" x2="61"  y2="52" stroke="#c0392b" stroke-width="1" stroke-dasharray="3,2" opacity="0.6"/>
+            <circle cx="61"  cy="59" r="4" fill="white" stroke="#c0392b" stroke-width="2"/>
+            <!-- JPMorgan (+0.2) row 2 -->
+            <text x="137" y="32" text-anchor="middle" font-size="10.5" fill="#e67e22" font-weight="600">JPMorgan</text>
+            <line x1="137" y1="35" x2="137" y2="52" stroke="#e67e22" stroke-width="1" stroke-dasharray="3,2" opacity="0.6"/>
+            <circle cx="137" cy="59" r="4" fill="white" stroke="#e67e22" stroke-width="2"/>
+            <!-- Microsoft (+1.4) row 1 -->
+            <text x="225" y="14" text-anchor="middle" font-size="10.5" fill="#229954" font-weight="600">Microsoft</text>
+            <line x1="225" y1="17" x2="225" y2="52" stroke="#229954" stroke-width="1" stroke-dasharray="3,2" opacity="0.6"/>
+            <circle cx="225" cy="59" r="4" fill="white" stroke="#229954" stroke-width="2"/>
+            <!-- NVIDIA (+2.7) row 2 -->
+            <text x="319" y="32" text-anchor="middle" font-size="10.5" fill="#1a7a4a" font-weight="600">NVIDIA</text>
+            <line x1="319" y1="35" x2="319" y2="52" stroke="#1a7a4a" stroke-width="1" stroke-dasharray="3,2" opacity="0.6"/>
+            <circle cx="319" cy="59" r="4" fill="white" stroke="#1a7a4a" stroke-width="2"/>
+            <!-- Oracle (+4.8) row 1 -->
+            <text x="472" y="14" text-anchor="middle" font-size="10.5" fill="#2980b9" font-weight="600">Oracle</text>
+            <line x1="472" y1="17" x2="472" y2="52" stroke="#2980b9" stroke-width="1" stroke-dasharray="3,2" opacity="0.6"/>
+            <circle cx="472" cy="59" r="4" fill="white" stroke="#2980b9" stroke-width="2"/>
+            <!-- Softbank (+8.5) row 2 -->
+            <text x="741" y="32" text-anchor="middle" font-size="10.5" fill="#8e44ad" font-weight="600">Softbank</text>
+            <line x1="741" y1="35" x2="741" y2="52" stroke="#8e44ad" stroke-width="1" stroke-dasharray="3,2" opacity="0.6"/>
+            <circle cx="741" cy="59" r="4" fill="white" stroke="#8e44ad" stroke-width="2"/>
+          </svg>
+          <figcaption style="font-size:11px;color:#888;text-align:center;margin-top:2px">Illustrative positions — actual scores depend on analysis</figcaption>
+        </figure>
         <p class="score-guide">Disruption Risk: <strong>-1 to 0</strong> (-1 = AI destroys business model, 0 = impervious). Moat: <strong>0 to 1</strong> (0 = no moat, 1 = strong moat — dampens disruption). AI Upside: <strong>0 to 1</strong> (0 = no tailwind, 1 = core AI beneficiary). AI Leverage: <strong>1 to 10</strong> (how much the company has bet on AI — 1 = modest, 10 = extreme leveraged play). Formula: <strong>AI-Beta = (Disruption × (1 − Moat)) + (AI Upside × AI Leverage)</strong>. Range: −1 (AI destroys value) to +10 (extreme AI bet). High leverage names (+5 to +10) carry binary risk — ideal for equity, dangerous for debt.</p>
         <div class="table-wrap">
           <table id="resultsTable">

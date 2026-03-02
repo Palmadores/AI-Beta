@@ -333,3 +333,11 @@ th {
     grid-template-columns: 1fr;
   }
 }
+
+.number-line-figure {
+  margin: 12px 0 8px;
+  padding: 12px 8px 6px;
+  background: var(--accent-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
