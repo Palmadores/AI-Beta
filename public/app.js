@@ -43,7 +43,7 @@ function computeAiBeta(row) {
   const disruption = clamp(row.disruption_risk, -1, 0);
   const moat = clamp(row.moat, 0, 1);
   const upside = clamp(row.ai_upside, 0, 1);
-  const leverage = clamp(row.ai_leverage, 1, 10);
+  const leverage = clamp(row.ai_leverage, 0, 10);
   return Number(((disruption * (1 - moat)) + (upside * leverage)).toFixed(4));
 }
 
@@ -257,10 +257,10 @@ function renderResults() {
     leverageInput.className = 'grid-input';
     leverageInput.type = 'number';
     leverageInput.step = '0.1';
-    leverageInput.min = '1';
+    leverageInput.min = '0';
     leverageInput.max = '10';
     leverageInput.value = row.ai_leverage;
-    bindNumberInput(leverageInput, index, 'ai_leverage', 1, 10);
+    bindNumberInput(leverageInput, index, 'ai_leverage', 0, 10);
     applyRagClass(leverageInput, 'ai_leverage', row.ai_leverage);
     leverageTd.appendChild(leverageInput);
 
@@ -387,7 +387,7 @@ function applySuggestedUpdate(suggestion) {
   row.disruption_risk = clamp(row.disruption_risk, -1, 0);
   row.moat = clamp(row.moat, 0, 1);
   row.ai_upside = clamp(row.ai_upside, 0, 1);
-  row.ai_leverage = clamp(row.ai_leverage, 1, 10);
+  row.ai_leverage = clamp(row.ai_leverage, 0, 10);
   row.ai_beta = computeAiBeta(row);
 
   renderResults();

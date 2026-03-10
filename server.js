@@ -531,16 +531,38 @@ async function analyzeOneCompany(company) {
       '  "comment": string',
       '}',
       'Scoring bounds and intent:',
-      '- disruption_risk: -1 to 0 (-1 = AI completely destroys existing business model/revenue e.g. WPP, Chegg; 0 = completely impervious to AI disruption)',
-      '- moat: 0 to 1 (0 = no competitive moat, fully exposed to disruption; 1 = very strong moat, disruption neutralised)',
+      '- disruption_risk: -1 to 0. How severely does AI threaten this company\'s existing revenue and business model?',
+      '  -1.0 = AI completely destroys the product/service category (e.g. Chegg displaced by ChatGPT, WPP creative by image AI)',
+      '  -0.8 to -0.9 = AI fundamentally disrupts core workflows (e.g. Salesforce CRM replaced by AI agents, Intuit tax by AI, Monday.com by AI project tools)',
+      '  -0.4 to -0.6 = meaningful disruption but company can adapt (e.g. traditional banks, legacy software)',
+      '  -0.1 to -0.2 = minor disruption, business largely resilient (e.g. physical infrastructure, energy)',
+      '  0 = completely impervious (e.g. commodities, sovereign debt)',
+      '- moat: 0 to 1. IMPORTANT: this is specifically resistance to AI disruption — NOT general competitive moat.',
+      '  Enterprise contracts and brand protect against competitors but NOT against AI replacing the product category.',
+      '  0.00-0.05 = AI directly replaces the product, no meaningful defence (Chegg, Duolingo core product, WPP)',
+      '  0.05-0.15 = enterprise lock-in or switching costs slow disruption but cannot prevent it (Salesforce, Intuit, Unity)',
+      '  0.15-0.35 = some structural advantages slow AI adoption (legacy system integration, compliance requirements)',
+      '  0.40-0.65 = genuine regulatory, physical or trust barriers (JPMorgan, insurance, utilities)',
+      '  0.70-1.00 = AI fundamentally cannot displace (physical infrastructure, sovereign bonds, critical national infrastructure)',
       '- ai_upside: 0 to 1 (0 = no AI revenue or competitive tailwind; 1 = core AI infrastructure beneficiary e.g. NVIDIA, cloud providers)',
-      '- ai_leverage: 1 to 10 (amplification multiplier for how much the company has bet on AI succeeding:',
-      '  1 = no AI leverage, modest tailwind;',
-      '  2-3 = meaningful AI strategic focus, some capex commitment;',
-      '  4-6 = heavy debt-funded AI capex, significant concentration e.g. Oracle, AWS;',
-      '  7-10 = pure leveraged AI play, binary outcome e.g. xAI, Softbank Vision Fund, CoreWeave)',
+      '- ai_leverage: 0 to 10. Amplification multiplier for how much the company has bet on AI succeeding.',
+      '  0 = no AI bet at all — company being disrupted or simply unaffected (Chegg, WPP, Salesforce, most SaaS being displaced)',
+      '  0.5-1 = modest AI initiatives, no meaningful capital commitment',
+      '  2-3 = meaningful AI strategic focus, real capex commitment (Microsoft, Google)',
+      '  4-6 = heavy debt-funded AI capex, significant business concentration (Oracle, AWS)',
+      '  7-10 = pure leveraged AI play, binary outcome — owns the world or bankrupt (xAI, Softbank Vision Fund, CoreWeave)',
       'Formula: AI-Beta = (disruption_risk x (1 - moat)) + (ai_upside x ai_leverage)',
-      'Output range: -1 (strongly negatively correlated with AI) to +10 (extreme leveraged AI bet)',
+      'Output range: -1 (AI destroys value) to +10 (extreme leveraged AI bet)',
+      'Calibration anchors — use these as reference points:',
+      '  Chegg: disruption=-0.95, moat=0.02, upside=0.02, leverage=0 → AI-Beta ≈ -0.93',
+      '  Salesforce: disruption=-0.87, moat=0.10, upside=0.12, leverage=0.5 → AI-Beta ≈ -0.84',
+      '  Intuit: disruption=-0.80, moat=0.12, upside=0.15, leverage=0.5 → AI-Beta ≈ -0.78',
+      '  JPMorgan: disruption=-0.30, moat=0.65, upside=0.30, leverage=1 → AI-Beta ≈ +0.20',
+      '  Microsoft: disruption=-0.20, moat=0.75, upside=0.75, leverage=2.5 → AI-Beta ≈ +1.83',
+      '  NVIDIA: disruption=-0.05, moat=0.85, upside=0.92, leverage=4 → AI-Beta ≈ +3.68',
+      '  Oracle: disruption=-0.15, moat=0.65, upside=0.85, leverage=8 → AI-Beta ≈ +6.75',
+      '  xAI: disruption=0, moat=0.40, upside=0.95, leverage=9 → AI-Beta ≈ +8.55',
+      '  Softbank: disruption=-0.05, moat=0.35, upside=0.90, leverage=10 → AI-Beta ≈ +8.97',
       'Comment rules:',
       '- one sentence only',
       '- explain the key score drivers concisely'
@@ -553,7 +575,7 @@ async function analyzeOneCompany(company) {
     disruption_risk: clamp(scores.disruption_risk, -1, 0),
     moat: clamp(scores.moat, 0, 1),
     ai_upside: clamp(scores.ai_upside, 0, 1),
-    ai_leverage: clamp(scores.ai_leverage, 1, 10)
+    ai_leverage: clamp(scores.ai_leverage, 0, 10)
   };
 
   return {
@@ -775,7 +797,7 @@ app.post('/api/dialogue', async (req, res) => {
         'Rules:',
         '- Explain rationale clearly and briefly.',
         '- suggested_updates should be null unless user asks to change/refine score/comment.',
-        '- Keep score bounds: disruption_risk [-1,0], moat [0,1] (0=no moat, 1=strong moat), ai_upside [0,1], ai_leverage [1,10] (1=no leverage, 10=extreme leveraged AI bet).',
+        '- Keep score bounds: disruption_risk [-1,0], moat [0,1] (0=no AI-disruption resistance, 1=fully protected), ai_upside [0,1], ai_leverage [0,10] (0=no AI bet, 10=extreme leveraged AI bet).',
         '- If suggesting updates, only set fields you propose to change; others must be null.'
       ].join('\n'),
       user: JSON.stringify({
@@ -799,7 +821,7 @@ app.post('/api/dialogue', async (req, res) => {
           : clamp(output.suggested_updates.ai_upside, 0, 1),
         ai_leverage: output.suggested_updates.ai_leverage == null
           ? null
-          : clamp(output.suggested_updates.ai_leverage, 1, 10),
+          : clamp(output.suggested_updates.ai_leverage, 0, 10),
         comment: output.suggested_updates.comment == null
           ? null
           : String(output.suggested_updates.comment).trim()
